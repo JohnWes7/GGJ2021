@@ -17,6 +17,8 @@ public class PlayerController : MonoBehaviour
     public float lookAngle = 70f;
     public float scale = 1f;
 
+    public GameObject select1;
+    //public GameObject select2;
 
     // Start is called before the first frame update
     void Start()
@@ -56,12 +58,10 @@ public class PlayerController : MonoBehaviour
         //前进
         if (Input.GetKey(Config.Instance.up))
         {
-            Debug.Log("w");
             verc = Mathf.Lerp(verc, 1, damping * Time.deltaTime);
         }
         else if (Input.GetKey(Config.Instance.down))
         {
-            Debug.Log("s");
             verc = Mathf.Lerp(verc, -1, damping * Time.deltaTime);
         }
         else
@@ -163,7 +163,7 @@ public class PlayerController : MonoBehaviour
     {
         for (int i = 0; i < sightList.Count; i++)
         {
-            sightList[i].GetComponent<ObjectController>().moveTimer -= Time.deltaTime;
+            sightList[i].GetComponent<ObjectController>().BeRoot();
         }
     }
 
@@ -193,6 +193,10 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// 鼠标点击检测
+    /// </summary>
+    /// <param name="sightList">视野范围内物体列表</param>
     public void MouseDown(List<GameObject> sightList)
     {
         if (Input.GetKeyDown(Config.Instance.mouseDown))
@@ -206,7 +210,33 @@ public class PlayerController : MonoBehaviour
                 //如果是点到了范围内的物体
                 if (sightList.Contains(hit.collider.gameObject))
                 {
-                    
+                    //如果select1没东西
+                    if (select1 == null)
+                    {
+                        hit.collider.GetComponent<ObjectController>().BeSelect();
+                        select1 = hit.collider.gameObject;
+                        return;
+                    }
+                    //如果select1存了物体
+                    else
+                    {
+                        if (hit.collider.gameObject == select1)
+                        {
+                            hit.collider.GetComponent<ObjectController>().BeSelect();
+                            select1 = hit.collider.gameObject;
+                            return;
+                        }
+                        //如果第二个选的物体的名字一样
+                        if (hit.collider.gameObject != select1 && hit.collider.name == select1.name)
+                        {
+                            select1.GetComponent<ObjectController>().Exit();
+                            hit.collider.GetComponent<ObjectController>().Exit();
+
+                            select1 = null;
+                        }
+                    }
+
+
                 }
             }
         }
