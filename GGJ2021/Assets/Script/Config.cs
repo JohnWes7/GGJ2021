@@ -19,7 +19,7 @@ public class Config : Single<Config>
         left = (KeyCode)PlayerPrefs.GetInt("left", (int)KeyCode.A);
         right = (KeyCode)PlayerPrefs.GetInt("right", (int)KeyCode.D);
 
-        speed = Random.Range(1f, 5f);
+        speed = 5f;
     }
 
     
