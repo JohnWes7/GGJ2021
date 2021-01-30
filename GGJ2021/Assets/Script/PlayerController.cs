@@ -203,11 +203,10 @@ public class PlayerController : MonoBehaviour
             
             if (hit.collider)
             {
-                Debug.Log(hit.collider.name);
                 //如果是点到了范围内的物体
                 if (sightList.Contains(hit.collider.gameObject))
                 {
-                    Debug.Log(hit.collider.name+"ggg");
+                    
                 }
             }
         }
