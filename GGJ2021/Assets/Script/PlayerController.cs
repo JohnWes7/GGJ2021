@@ -4,20 +4,24 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    public static PlayerController instanc;
+
+    public Transform pos;
     float hori = 0;
     float verc = 0;
     float damping = 10;
 
     //初始检测距离
-    float distance = 2;
+    public float distance = 2.5f;
     //初始视角范围
-    float lookAngle = 40f;
+    public float lookAngle = 70f;
+    public float scale = 1f;
 
 
     // Start is called before the first frame update
     void Start()
     {
-        
+        instanc = this;
     }
 
     // Update is called once per frame
@@ -25,8 +29,19 @@ public class PlayerController : MonoBehaviour
     {
         //按键检测
         ButtonDetect();
+        //出界判定
+        OutOfBounds();
         //射线检测
-        ObjectInYourSight();
+        List<GameObject> sightList = ObjectInYourSight();
+        #region debug
+        //Debug.Log(sightList.Count);
+        //for (int i = 0; i < sightList.Count; i++)
+        //{
+        //    Debug.Log(sightList[i].name);
+        //} 
+        #endregion
+
+        RootObject(sightList);
     }
 
     /// <summary>
@@ -51,7 +66,6 @@ public class PlayerController : MonoBehaviour
         }
 
         transform.Translate(0, verc * Config.Instance.speed * Time.deltaTime, 0);
-        Debug.Log(verc);
 
         //float x = Input.GetAxis("Horizontal");
         //float y = Input.GetAxis("Vertical");
@@ -76,11 +90,16 @@ public class PlayerController : MonoBehaviour
         }
         transform.Rotate(0, 0, hori * Config.Instance.speed * 30 * Time.deltaTime);
     }
+
+    /// <summary>
+    /// 取在视野范围内的物体
+    /// </summary>
+    /// <returns>所有被检测到的物体列表</returns>
     public List<GameObject> ObjectInYourSight()
     {
         int lookAccurate = 4;
         List<GameObject> list = new List<GameObject>();
-        RaycastHit[] hitInfo;
+        RaycastHit2D[] hitInfo;
 
         hitInfo = RayDetect(Quaternion.identity, distance);
         for (int i = 0; i < hitInfo.Length; i++)
@@ -94,8 +113,8 @@ public class PlayerController : MonoBehaviour
         float sub = (lookAngle / 2) / lookAccurate;
         for (int i = 0; i < lookAccurate; i++)
         {
-            RaycastHit[] hitLeft = RayDetect(Quaternion.Euler(0, 0, sub * (i + 1)), distance);
-            RaycastHit[] hitRight = RayDetect(Quaternion.Euler(0, 0, -1 * sub * (i + 1)), distance);
+            RaycastHit2D[] hitLeft = RayDetect(Quaternion.Euler(0, 0, sub * (i + 1)), distance);
+            RaycastHit2D[] hitRight = RayDetect(Quaternion.Euler(0, 0, -1 * sub * (i + 1)), distance);
 
             for (int j = 0; j < hitLeft.Length; j++)
             {
@@ -113,15 +132,68 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        return null;
+        return list;
     }
-    public RaycastHit[] RayDetect(Quaternion eularAngle, float distance)
-    {
-        Debug.DrawRay(transform.position, eularAngle * transform.forward.normalized, Color.green);
 
-        RaycastHit[] hitInfo;
-        hitInfo = Physics.RaycastAll(transform.position, eularAngle * transform.forward.normalized, 20f, 1 << LayerMask.NameToLayer("Object"));
+    /// <summary>
+    /// 射线检测
+    /// </summary>
+    /// <param name="eularAngle">角度偏移量</param>
+    /// <param name="distance">检测长度</param>
+    /// <returns>检测到的物体</returns>
+    public RaycastHit2D[] RayDetect(Quaternion eularAngle, float distance)
+    {
+        Debug.DrawRay(transform.position, eularAngle * transform.up.normalized * distance, Color.green);
+
+        RaycastHit2D[] hitInfo;
+        hitInfo = Physics2D.RaycastAll(transform.position, eularAngle * transform.up.normalized, distance, 1 << LayerMask.NameToLayer("Object"));
 
         return hitInfo;
+    }
+
+    /// <summary>
+    /// 定住视野范围内的物体
+    /// </summary>
+    /// <param name="sightList">视野范围内物体的列表</param>
+    public void RootObject(List<GameObject> sightList)
+    {
+        for (int i = 0; i < sightList.Count; i++)
+        {
+            sightList[i].GetComponent<ObjectController>().moveTimer -= Time.deltaTime;
+        }
+    }
+
+    /// <summary>
+    /// 出界
+    /// </summary>
+    public void OutOfBounds()
+    {
+        Vector3 pos = this.pos.position;
+
+        //出界判定
+        if (pos.y > GameSceneManager.instance.planeOffsetY.y)
+        {
+            transform.position = new Vector3(transform.position.x, transform.position.y - 2 * GameSceneManager.instance.planeOffsetY.y);
+        }
+        if (pos.y < GameSceneManager.instance.planeOffsetY.x)
+        {
+            transform.position = new Vector3(transform.position.x, transform.position.y + 2 * GameSceneManager.instance.planeOffsetY.y);
+        }
+        if (pos.x > GameSceneManager.instance.planeOffsetX.y)
+        {
+            transform.position = new Vector3(transform.position.x - 2 * GameSceneManager.instance.planeOffsetX.y, transform.position.y);
+        }
+        if (pos.x < GameSceneManager.instance.planeOffsetX.x)
+        {
+            transform.position = new Vector3(transform.position.x + 2 * GameSceneManager.instance.planeOffsetX.y, transform.position.y);
+        }
+    }
+
+    public void MouseDown()
+    {
+        if (Input.GetKeyDown(KeyCode.Mouse0))
+        {
+
+        }
     }
 }
