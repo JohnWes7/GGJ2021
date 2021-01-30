@@ -31,6 +31,8 @@ public class PlayerController : MonoBehaviour
         ButtonDetect();
         //出界判定
         OutOfBounds();
+        
+
         //射线检测
         List<GameObject> sightList = ObjectInYourSight();
         #region debug
@@ -40,7 +42,9 @@ public class PlayerController : MonoBehaviour
         //    Debug.Log(sightList[i].name);
         //} 
         #endregion
-
+        //鼠标点击
+        MouseDown(sightList);
+        //定住物体
         RootObject(sightList);
     }
 
@@ -189,11 +193,23 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    public void MouseDown()
+    public void MouseDown(List<GameObject> sightList)
     {
-        if (Input.GetKeyDown(KeyCode.Mouse0))
+        if (Input.GetKeyDown(Config.Instance.mouseDown))
         {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
+            RaycastHit2D hit = Physics2D.Raycast(new Vector2(ray.origin.x, ray.origin.y), Vector2.zero);
+            
+            if (hit.collider)
+            {
+                Debug.Log(hit.collider.name);
+                //如果是点到了范围内的物体
+                if (sightList.Contains(hit.collider.gameObject))
+                {
+                    Debug.Log(hit.collider.name+"ggg");
+                }
+            }
         }
     }
 }

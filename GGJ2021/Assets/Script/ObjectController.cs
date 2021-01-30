@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class ObjectController : MonoBehaviour
 {
@@ -55,5 +56,12 @@ public class ObjectController : MonoBehaviour
         }
 
         transform.position = newPos;
+    }
+
+    public void BeSelect()
+    {
+        isSelect = true;
+
+        
     }
 }
