@@ -16,7 +16,7 @@ public class GameOvePanelController : MonoBehaviour
     }
 
     public void BackCallBack(params object[] objs)
-    { 
+    {
         GameObject StartPanel = GameObject.Find("/Canvas/StartPanel");
 
         Debug.Log(SceneManager.GetActiveScene().name);

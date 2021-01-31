@@ -37,6 +37,12 @@ public class PlayerController : MonoBehaviour
     //游戏时间
     public float gameTime = 0;
 
+    //音频
+    public AudioClip Right;
+    public AudioClip Select;
+    public AudioClip Wrong;
+    public AudioSource m_AudioSource;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -76,7 +82,7 @@ public class PlayerController : MonoBehaviour
         ButtonDetect();
         //出界判定
         OutOfBounds();
-        
+
 
         //射线检测
         List<GameObject> sightList = ObjectInYourSight();
@@ -247,7 +253,7 @@ public class PlayerController : MonoBehaviour
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
             RaycastHit2D hit = Physics2D.Raycast(new Vector2(ray.origin.x, ray.origin.y), Vector2.zero);
-            
+
             if (hit.collider)
             {
                 //如果是点到了范围内的物体
@@ -258,6 +264,10 @@ public class PlayerController : MonoBehaviour
                     {
                         hit.collider.GetComponent<ObjectController>().BeSelect();
                         select1 = hit.collider.gameObject;
+
+                        //声音
+                        PlayAudio(Select);
+
                         return;
                     }
                     //如果select1存了物体
@@ -267,6 +277,10 @@ public class PlayerController : MonoBehaviour
                         {
                             hit.collider.GetComponent<ObjectController>().BeSelect();
                             select1 = hit.collider.gameObject;
+
+                            //声音
+                            PlayAudio(Select);
+
                             return;
                         }
                         //如果第二个选的物体的名字一样
@@ -279,12 +293,19 @@ public class PlayerController : MonoBehaviour
                             AddPower(40);
 
                             select1 = null;
+
+                            //声音
+                            PlayAudio(Right);
+
                             return;
                         }
                         //如果第二个选的物体的名字不一样
                         else
                         {
                             hit.collider.GetComponent<ObjectController>().BeSelectWrong();
+
+                            //声音
+                            PlayAudio(Wrong);
                         }
                     }
 
@@ -327,12 +348,13 @@ public class PlayerController : MonoBehaviour
         //sequence.Append(white.DOFade(0, 0.3f));
         sequence.Append(white.DOFade(0, 1.5f).SetEase(Ease.InBounce));
 
-        sequence.onComplete += () => { 
+        sequence.onComplete += () =>
+        {
             GameSceneManager.instance.GameOver();
             Destroy(gameObject);
         };
-        
-        
+
+
     }
 
     /// <summary>
@@ -343,5 +365,16 @@ public class PlayerController : MonoBehaviour
     {
         power = Mathf.Clamp(power += num, 0, 100);
         onPowerChange.Invoke(power);
+    }
+
+    /// <summary>
+    /// 播放声音
+    /// </summary>
+    /// <param name="clip">声音</param>
+    public void PlayAudio(AudioClip clip)
+    {
+        m_AudioSource.clip = clip;
+        m_AudioSource.volume = PlayerPrefs.GetFloat("Volume", 1);
+        m_AudioSource.Play();
     }
 }

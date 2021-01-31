@@ -56,11 +56,11 @@ public class GameSceneManager : MonoBehaviour
     public void InIt()
     {
         prefabsList.Add(Resources.Load<GameObject>(circle));
-        //prefabsList.Add(Resources.Load<GameObject>(diamond));
-        //prefabsList.Add(Resources.Load<GameObject>(heart));
-        //prefabsList.Add(Resources.Load<GameObject>(plum));
-        //prefabsList.Add(Resources.Load<GameObject>(star));
-        //prefabsList.Add(Resources.Load<GameObject>(triangle));
+        prefabsList.Add(Resources.Load<GameObject>(diamond));
+        prefabsList.Add(Resources.Load<GameObject>(heart));
+        prefabsList.Add(Resources.Load<GameObject>(plum));
+        prefabsList.Add(Resources.Load<GameObject>(star));
+        prefabsList.Add(Resources.Load<GameObject>(triangle));
 
         for (int i = 0; i < prefabsList.Count; i++)
         {

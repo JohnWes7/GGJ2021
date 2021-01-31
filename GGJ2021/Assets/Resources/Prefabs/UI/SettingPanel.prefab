@@ -1462,8 +1462,8 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: SettingPanel, Assembly-CSharp
+      - m_Target: {fileID: 8317654223618610107}
+        m_TargetAssemblyTypeName: SettingPanelController, Assembly-CSharp
         m_MethodName: ScreenResolutionChange
         m_Mode: 0
         m_Arguments:
@@ -1570,6 +1570,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78f4df46dab033843a4037704580284f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  VolumeSlider: {fileID: 2654466696415451964}
+  VolumeValueText: {fileID: 980678537}
+  ResolutionDropdown: {fileID: 1973479439}
 --- !u!1 &2654466694951789842
 GameObject:
   m_ObjectHideFlags: 0
@@ -1844,8 +1847,8 @@ MonoBehaviour:
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: SettingPanel, Assembly-CSharp
+      - m_Target: {fileID: 8317654223618610107}
+        m_TargetAssemblyTypeName: SettingPanelController, Assembly-CSharp
         m_MethodName: VolumeSliderChange
         m_Mode: 0
         m_Arguments:
