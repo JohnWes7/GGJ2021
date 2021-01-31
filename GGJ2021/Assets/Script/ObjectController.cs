@@ -28,6 +28,10 @@ public class ObjectController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (GameSceneManager.instance.isGameOver)
+        {
+            return;
+        }
         //如果没有被选择就加时间
         if (!isSelect)
         {
@@ -38,6 +42,11 @@ public class ObjectController : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (GameSceneManager.instance.isGameOver)
+        {
+            return;
+        }
+
         if (moveTimer > moveTime)
         {
             Move();
@@ -55,7 +64,7 @@ public class ObjectController : MonoBehaviour
         {
             return;
         }
-        Transform player = PlayerController.instanc.transform;
+        Transform player = GameSceneManager.instance.player.transform;
         Vector2 x = GameSceneManager.instance.planeOffsetX;
         Vector2 y = GameSceneManager.instance.planeOffsetY;
 
@@ -78,10 +87,21 @@ public class ObjectController : MonoBehaviour
                 continue;
             }
 
-            if (distance > PlayerController.instanc.distance || angle > PlayerController.instanc.lookAngle / 2 + 15)
+            if (PlayerController.instance != null)
             {
-                break;
+                if (distance > PlayerController.instance.distance || angle > PlayerController.instance.lookAngle / 2 + 15)
+                {
+                    break;
+                }
             }
+            else
+            {
+                if (distance > 2.5f || angle > 50)
+                {
+                    break;
+                }
+            }
+            
         }
 
         transform.rotation = Quaternion.Euler(0, 0, Random.Range(0f, 360f));
@@ -97,6 +117,7 @@ public class ObjectController : MonoBehaviour
             moveTimer -= Time.deltaTime;
         }
     }
+
     /// <summary>
     /// 被选择时候被player调用
     /// </summary>
@@ -124,6 +145,15 @@ public class ObjectController : MonoBehaviour
 
         sequence.onComplete += AniCallBack;
     }
+
+    /// <summary>
+    /// 选错时动画
+    /// </summary>
+    public void BeSelectWrong()
+    {
+        transform.DOShakeRotation(0.5f, new Vector3(0, 0, 45), 10, 90);
+    }
+
     /// <summary>
     /// 点击高亮动画结束后回调函数
     /// </summary>
@@ -133,7 +163,7 @@ public class ObjectController : MonoBehaviour
         //立马一次闪现(如果不在范围内）
         moveTimer = 2.9f;
         //清除select
-        PlayerController.instanc.select1 = null;
+        PlayerController.instance.select1 = null;
     }
     public void Exit()
     {
@@ -150,9 +180,11 @@ public class ObjectController : MonoBehaviour
         sequence = DOTween.Sequence();//重置
         sequence.Append(m_spriteRenderer.DOColor(highLight, 0.1f));
         sequence.Append(m_spriteRenderer.DOColor(black, 0.1f)).SetEase(Ease.InCirc);
-        transform.DOMove(PlayerController.instanc.transform.position, 0.2f);
+        transform.DOMove(PlayerController.instance.transform.position, 0.2f);
         transform.DOScale(0, 0.2f);
 
-        sequence.onComplete += () => { Destroy(gameObject); };
+        sequence.onComplete += () => {
+            GameSceneManager.instance.RemoveObject(gameObject);//在列表中消失自己
+            Destroy(gameObject); };
     }
 }

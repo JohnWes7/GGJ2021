@@ -1,10 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
+using DG.Tweening;
 
 public class PlayerController : MonoBehaviour
 {
-    public static PlayerController instanc;
+    public static PlayerController instance;
+
+    //精灵
+    public SpriteRenderer white;
+    //动画队列
+    Sequence sequence;
 
     public Transform pos;
     float hori = 0;
@@ -20,15 +27,51 @@ public class PlayerController : MonoBehaviour
     public GameObject select1;
     //public GameObject select2;
 
+    //电量
+    private int power = 100;
+    private float powerTimer = 0;
+    public UnityEvent<int> onPowerChange = new UnityEvent<int>();
+
+    bool isDead = false;
+
+    //游戏时间
+    public float gameTime = 0;
+
     // Start is called before the first frame update
     void Start()
     {
-        instanc = this;
+        //添加回调函数
+        onPowerChange.AddListener(GameSceneManager.instance.gamePanel.UpdatePower);//显示更新回调
+        onPowerChange.AddListener(DetectPower);//电量检测函数
+
+        instance = this;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (isDead)
+        {
+            return;
+        }
+
+        //计时器
+        if (!GameSceneManager.instance.isGameOver)
+        {
+            powerTimer += Time.deltaTime;
+            gameTime += Time.deltaTime;
+        }
+
+        if (powerTimer >= 1)
+        {
+            //掉电量
+            power = Mathf.Clamp(power - 1, 0, 100);
+            //执行在点亮改变时的回调函数(检测power是否为零，更新UI显示)
+            onPowerChange.Invoke(power);
+
+            powerTimer = 0;
+        }
+
         //按键检测
         ButtonDetect();
         //出界判定
@@ -232,7 +275,16 @@ public class PlayerController : MonoBehaviour
                             select1.GetComponent<ObjectController>().Exit();
                             hit.collider.GetComponent<ObjectController>().Exit();
 
+                            //增加电量
+                            AddPower(40);
+
                             select1 = null;
+                            return;
+                        }
+                        //如果第二个选的物体的名字不一样
+                        else
+                        {
+                            hit.collider.GetComponent<ObjectController>().BeSelectWrong();
                         }
                     }
 
@@ -240,5 +292,56 @@ public class PlayerController : MonoBehaviour
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// 检测power
+    /// </summary>
+    /// <param name="power"></param>
+    public void DetectPower(int power)
+    {
+        if (power <= 0)
+        {
+            Dead();
+        }
+    }
+
+    /// <summary>
+    /// 游戏结束
+    /// </summary>
+    public void Dead()
+    {
+        if (isDead)
+        {
+            return;
+        }
+
+        isDead = true;
+
+        sequence = DOTween.Sequence();//重置
+
+        //sequence.Append(white.DOFade(0.3f, 0.1f));
+        //sequence.Append(white.DOFade(1f, 0.1f));
+        //sequence.Append(white.DOFade(0.3f, 0.1f));
+        //sequence.Append(white.DOFade(1f, 0.1f));
+        //sequence.Append(white.DOFade(0, 0.3f));
+        sequence.Append(white.DOFade(0, 1.5f).SetEase(Ease.InBounce));
+
+        sequence.onComplete += () => { 
+            GameSceneManager.instance.GameOver();
+            Destroy(gameObject);
+        };
+        
+        
+    }
+
+    /// <summary>
+    /// 增加电量方法
+    /// </summary>
+    /// <param name="num">增加的电量</param>
+    public void AddPower(int num)
+    {
+        power = Mathf.Clamp(power += num, 0, 100);
+        onPowerChange.Invoke(power);
     }
 }
